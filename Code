@@ -58,15 +58,15 @@ rep5;
 
 //Compute the symmetric square of each A5-rep of deg 5.
 
-SS:=[];
+ss:=[];
 for r in rep5 do
-    Append(~SS,SymmetricSquare(r));
+    Append(~ss,SymmetricSquare(r));
 end for;
-SS;
+ss;
 
-//Check the invariant lines for each of the symmetric square of the A5-reps. Choose one of them and try. In the following, we do it with SS[1].
+//Check the invariant lines for each of the symmetric square of the A5-reps. Choose one of them and try. The symmetric squares of the irreducible and 4+1 representations are ss[1] and ss[2].
 
-G:=MatrixGroup(SS[2]);
+G:=MatrixGroup(ss[2]);
 
 gens := GeneratorsSequence(G);
 
