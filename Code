@@ -1,0 +1,93 @@
+// All nondecreasing index-lists (repetitions allowed) whose L-values sum to d.
+// Assumes all entries of L are positive integers.
+IndexListsWithSumRepetition := function(L, d)
+    n := #L;
+
+    // dp[s+1] will be the sequence of index-lists summing to s
+    dp := [ [] : t in [1..d+1] ];
+    dp[1] := [ [] ];  // sum 0 achieved by the empty list
+
+    // Process indices in increasing order; appending i preserves nondecreasing order.
+    for i in [1..n] do
+        w := L[i];
+
+        // For each achievable sum so far, append i k times (k >= 1) as long as we stay <= d
+        for s in [0..d] do
+            sols := dp[s+1];
+            if #sols eq 0 then
+                continue;
+            end if;
+
+            maxk := (d - s) div w;
+            if maxk eq 0 then
+                continue;
+            end if;
+
+            for sol in sols do
+                for k in [1..maxk] do
+                    newsol := sol cat [ i : t in [1..k] ];
+                    Append(~dp[s + k*w + 1], newsol);
+                end for;
+            end for;
+        end for;
+    end for;
+
+    return Setseq(Set(dp[d+1]));
+end function;
+
+
+//Compute all the A5-reps of degree 5.
+
+
+K:=CyclotomicField(30);
+G:=AlternatingGroup(5);
+irr := IrreducibleModules(G,K);
+dims:=[Dimension(irr[i]):i in [1..#irr]];
+
+ind5:=IndexListsWithSumRepetition(dims,5);
+ind5;
+rep5:=[];
+for ind in ind5 do
+    r:=irr[ind[1]];
+    for i in [2..#ind] do
+        r:=DirectSum(r,irr[ind[i]]);
+    end for;
+    Append(~rep5,r);
+end for;
+rep5;
+
+//Compute the symmetric square of each A5-rep of deg 5.
+
+SS:=[];
+for r in rep5 do
+    Append(~SS,SymmetricSquare(r));
+end for;
+SS;
+
+//Check the invariant lines for each of the symmetric square of the A5-reps. Choose one of them and try. In the following, we do it with SS[1].
+
+G:=MatrixGroup(SS[2]);
+
+gens := GeneratorsSequence(G);
+
+// Start with eigenspaces of the first generator
+A := gens[1];
+cands := [ Eigenspace(A, t[1]) : t in Eigenvalues(A) ];
+
+// Refine by intersecting with eigenspaces of the other generators
+for j in [2..#gens] do
+    B := gens[j];
+    newcands := [];
+    for E in cands do
+        for t in Eigenvalues(B) do
+            lam := t[1];
+            F := E meet Eigenspace(B, lam);
+            if Dimension(F) gt 0 then
+                Append(~newcands, F);
+            end if;
+        end for;
+    end for;
+    cands := newcands;
+end for;
+
+cands;
